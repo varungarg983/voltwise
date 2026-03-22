@@ -1,0 +1,56 @@
+<svg width="900" height="700" viewBox="0 0 900 700" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="80" x2="720" y2="540" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#79D7FF" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#6FF0C4" stop-opacity="0.12"/>
+    </linearGradient>
+    <linearGradient id="car" x1="204" y1="406" x2="628" y2="406" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7CD9FF"/>
+      <stop offset="1" stop-color="#6FF0C4"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#14243A"/>
+      <stop offset="1" stop-color="#0D1728"/>
+    </linearGradient>
+    <filter id="shadow" x="132" y="148" width="648" height="430" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="28" stdDeviation="28" flood-color="#000000" flood-opacity="0.32"/>
+    </filter>
+  </defs>
+
+  <circle cx="686" cy="146" r="92" fill="#8B7DFF" fill-opacity="0.12"/>
+  <circle cx="202" cy="132" r="120" fill="#79D7FF" fill-opacity="0.16"/>
+  <rect x="120" y="170" width="660" height="360" rx="28" fill="url(#bg)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="164" y="192" width="572" height="318" rx="30" fill="url(#panel)" stroke="rgba(255,255,255,0.08)"/>
+  </g>
+
+  <rect x="196" y="226" width="220" height="118" rx="20" fill="#101D30" stroke="#213756"/>
+  <text x="220" y="262" fill="#D9E8FF" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700">Current vs EV</text>
+  <text x="220" y="292" fill="#8FA4C1" font-family="Inter, Arial, sans-serif" font-size="14">Weekly cost</text>
+  <text x="220" y="328" fill="#79D7FF" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="800">$73</text>
+  <text x="290" y="328" fill="#8FA4C1" font-family="Inter, Arial, sans-serif" font-size="14">petrol</text>
+  <text x="220" y="350" fill="#6FF0C4" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="700">$56</text>
+  <text x="278" y="350" fill="#8FA4C1" font-family="Inter, Arial, sans-serif" font-size="14">EV + RUC</text>
+
+  <rect x="446" y="226" width="258" height="118" rx="20" fill="#101D30" stroke="#213756"/>
+  <text x="470" y="262" fill="#D9E8FF" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="700">Net wealth</text>
+  <path d="M474 318C504 302 520 320 548 286C564 266 586 256 608 268C632 282 648 280 676 246" stroke="#79D7FF" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="676" cy="246" r="8" fill="#6FF0C4"/>
+
+  <rect x="210" y="390" width="428" height="20" rx="10" fill="#162740"/>
+  <rect x="210" y="390" width="316" height="20" rx="10" fill="url(#car)"/>
+
+  <path d="M246 454C260 424 286 408 320 406H484C520 406 544 420 560 454H246Z" fill="url(#car)"/>
+  <path d="M298 404C312 374 338 356 374 356H456C484 356 506 370 518 404H298Z" fill="#A7F1FF" fill-opacity="0.92"/>
+  <circle cx="312" cy="458" r="36" fill="#09131F"/>
+  <circle cx="312" cy="458" r="18" fill="#223754"/>
+  <circle cx="500" cy="458" r="36" fill="#09131F"/>
+  <circle cx="500" cy="458" r="18" fill="#223754"/>
+
+  <path d="M644 400L676 370L712 400L676 430L644 400Z" fill="#8B7DFF" fill-opacity="0.82"/>
+  <path d="M676 348V390" stroke="#8B7DFF" stroke-width="10" stroke-linecap="round"/>
+  <path d="M654 390H698" stroke="#8B7DFF" stroke-width="10" stroke-linecap="round"/>
+
+  <text x="196" y="550" fill="#8FA4C1" font-family="Inter, Arial, sans-serif" font-size="16">Opportunity cost · depreciation · financing · tax effect</text>
+</svg>

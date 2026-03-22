@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b1020" />
+  <title>VoltWise | Car vs EV Decision Dashboard</title>
+  <meta name="description" content="Compare keeping your current car vs buying an EV with NZ-focused running costs, RUC, depreciation, financing, tax effects and opportunity cost." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">⚡</div>
+        <div>
+          <div class="brand-name">VoltWise</div>
+          <div class="brand-tag">Decision dashboard</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#hero" class="nav-item active">Overview</a>
+        <a href="#inputs" class="nav-item">Inputs</a>
+        <a href="#results" class="nav-item">Results</a>
+        <a href="#charts" class="nav-item">Charts</a>
+      </nav>
+
+      <div class="sidebar-card">
+        <p class="eyebrow">Quick presets</p>
+        <button class="ghost-btn" id="btnFetchPetrol">Fetch petrol from MBIE</button>
+        <button class="ghost-btn" id="btnPresetElecAvg">Set electricity to 0.393</button>
+        <button class="ghost-btn" id="btnPresetElecCheap">Set electricity to 0.30</button>
+        <div class="status-line" id="autofillStatus">Autofill idle</div>
+      </div>
+
+      <div class="sidebar-card">
+        <p class="eyebrow">Netlify-ready</p>
+        <p class="small-muted">Upload this folder directly. The homepage is already set as <code>index.html</code>.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="hero glass" id="hero">
+        <div class="hero-copy">
+          <span class="chip">NZ-focused model</span>
+          <h1>Buy the EV, or keep the car and invest the difference?</h1>
+          <p class="hero-text">
+            A startup-style financial cockpit for car decisions. Compare weekly cashflow, depreciation,
+            financing, tax effects, resale value, and opportunity cost without the emotional fog.
+          </p>
+          <div class="hero-actions">
+            <button class="primary-btn" data-scroll="#inputs">Start with inputs</button>
+            <button class="secondary-btn" id="btnReset">Reset defaults</button>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <img src="assets/hero-ev.svg" alt="Illustration of EV dashboard" />
+        </div>
+      </section>
+
+      <section class="top-metrics" id="results">
+        <article class="metric-card glass">
+          <div class="metric-label">EV weekly EMI</div>
+          <div class="metric-value" id="kpiEvEmi">—</div>
+          <div class="metric-sub" id="kpiEvEmiSub"></div>
+        </article>
+
+        <article class="metric-card glass">
+          <div class="metric-label">Weekly running cost</div>
+          <div class="metric-value" id="kpiRunWeekly">—</div>
+          <div class="metric-sub" id="kpiRunWeeklySub"></div>
+        </article>
+
+        <article class="metric-card glass">
+          <div class="metric-label">End net wealth</div>
+          <div class="metric-value" id="kpiNetWealth">—</div>
+          <div class="metric-sub" id="kpiNetWealthSub"></div>
+        </article>
+
+        <article class="metric-card glass">
+          <div class="metric-label">Opportunity cost</div>
+          <div class="metric-value" id="kpiOpp">—</div>
+          <div class="metric-sub" id="kpiOppSub"></div>
+        </article>
+      </section>
+
+      <section class="grid-section" id="inputs">
+        <div class="panel glass">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Inputs</p>
+              <h2>Tell the model about your current car and the EV</h2>
+            </div>
+            <div class="toolbar">
+              <button class="ghost-btn" id="btnSave">Export scenario</button>
+              <label class="import-pill">
+                <span>Import</span>
+                <input id="fileLoad" type="file" accept="application/json" />
+              </label>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="field">
+              <label for="weeklyKm">Weekly distance</label>
+              <div class="input-wrap">
+                <input id="weeklyKm" type="number" min="0" step="1" value="650">
+                <span class="unit">km / week</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="investReturn">Investment return</label>
+              <div class="input-wrap">
+                <input id="investReturn" type="number" step="0.1" value="7.0">
+                <span class="unit">% / year</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="inflation">Inflation</label>
+              <div class="input-wrap">
+                <input id="inflation" type="number" step="0.1" value="0.0">
+                <span class="unit">% / year</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="analysisYears">Chart horizon</label>
+              <div class="input-wrap">
+                <input id="analysisYears" type="number" min="1" step="0.5" value="5">
+                <span class="unit">years</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="switch-row">
+            <label class="switch-card">
+              <input id="inflateRUC" type="checkbox" checked>
+              <span>Inflate RUC</span>
+              <small>Apply inflation to RUC too</small>
+            </label>
+            <label class="switch-card">
+              <input id="sellCurrentForEV" type="checkbox">
+              <span>Use current car equity</span>
+              <small>Apply it as EV down payment</small>
+            </label>
+            <label class="switch-card">
+              <input id="businessUse" type="checkbox">
+              <span>Business use enabled</span>
+              <small>Apply simplified tax savings</small>
+            </label>
+          </div>
+
+          <div class="subgrid">
+            <section class="subpanel">
+              <div class="subpanel-head">
+                <h3>Current car</h3>
+                <p>Petrol or hybrid you already own</p>
+              </div>
+
+              <div class="stack-fields">
+                <div class="field">
+                  <label for="curEmiWeekly">Weekly EMI</label>
+                  <div class="input-wrap">
+                    <input id="curEmiWeekly" type="number" step="1" value="80">
+                    <span class="unit">NZD / week</span>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="curKmPerL">Fuel efficiency</label>
+                  <div class="input-wrap">
+                    <input id="curKmPerL" type="number" step="0.1" value="23">
+                    <span class="unit">km / L</span>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="petrolPrice">Petrol price</label>
+                  <div class="input-wrap">
+                    <input id="petrolPrice" type="number" step="0.01" value="2.80">
+                    <span class="unit">NZD / L</span>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="curMarketValue">Current value</label>
+                  <div class="input-wrap">
+                    <input id="curMarketValue" type="number" step="100" value="16000">
+                    <span class="unit">NZD</span>
+                  </div>
+                </div>
+
+                <details class="details-block">
+                  <summary>Advanced current-car settings</summary>
+                  <div class="field">
+                    <label for="curLoanBalance">Current loan balance</label>
+                    <div class="input-wrap">
+                      <input id="curLoanBalance" type="number" step="100" value="15000">
+                      <span class="unit">NZD</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="curLoanRate">Current loan interest</label>
+                    <div class="input-wrap">
+                      <input id="curLoanRate" type="number" step="0.1" value="10.0">
+                      <span class="unit">% / year</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label for="curDepRate">Current car depreciation</label>
+                    <div class="input-wrap">
+                      <input id="curDepRate" type="number" step="0.1" value="10.0">
+                      <span class="unit">% / year</span>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </section>
+
+            <section class="subpanel accent">
+              <div class="subpanel-head">
+                <h3>New EV</h3>
+                <p>The vehicle you’re considering</p>
+              </div>
+
+              <div class="stack-fields">
+                <div class="field">
+                  <label for="evPrice">Purchase price</label>
+                  <div class="input-wrap">
+                    <input id="evPrice" type="number" step="100" value="42000">
+                    <span class="unit">NZD</span>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="evLoanRate">Loan interest</label>
+                  <div class="input-wrap">
+                    <input id="evLoanRate" type="number" step="0.1" value="10.0">
+                    <span class="unit">% / year</span>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="evLoanYears">Loan term</label>
+                  <div class="input-wrap">
+                    <input id="evLoanYears" type="number" min="0.5" step="0.5" value="5">
+                    <span class="unit">years</span>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="evKwhPer100">EV efficiency</label>
+                  <div class="input-wrap">
+                    <input id="evKwhPer100" type="number" min="5" step="0.1" value="18">
+                    <span class="unit">kWh / 100km</span>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="elecPrice">Electricity price</label>
+                  <div class="input-wrap">
+                    <input id="elecPrice" type="number" step="0.001" value="0.30">
+                    <span class="unit">NZD / kWh</span>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label for="rucPer1000">RUC rate</label>
+                  <div class="input-wrap">
+                    <input id="rucPer1000" type="number" step="1" value="76">
+                    <span class="unit">NZD / 1000km</span>
+                  </div>
+                </div>
+
+                <details class="details-block">
+                  <summary>Advanced EV and tax settings</summary>
+                  <div class="field">
+                    <label for="depYear1">Year 1 depreciation</label>
+                    <div class="input-wrap">
+                      <input id="depYear1" type="number" step="0.1" value="25">
+                      <span class="unit">% of value</span>
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label for="depLater">Years 2+ depreciation</label>
+                    <div class="input-wrap">
+                      <input id="depLater" type="number" step="0.1" value="15">
+                      <span class="unit">% / year</span>
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label for="taxRate">Tax rate</label>
+                    <div class="input-wrap">
+                      <input id="taxRate" type="number" step="0.1" value="30">
+                      <span class="unit">% </span>
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label for="businessPct">Business use</label>
+                    <div class="input-wrap">
+                      <input id="businessPct" type="number" step="1" value="100">
+                      <span class="unit">% </span>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div class="panel glass">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Recommendation</p>
+              <h2>What the model thinks</h2>
+            </div>
+          </div>
+
+          <div class="warnbox" id="warnBox"></div>
+
+          <div class="recommend-card">
+            <div class="recommend-badge neutral" id="recommendBadge">NEUTRAL</div>
+            <p class="recommend-copy" id="recommendText">Fill inputs to see a recommendation.</p>
+          </div>
+
+          <div class="summary-card">
+            <h3>Decision notes</h3>
+            <ul class="summary-list" id="summaryList">
+              <li>Weekly finance and running costs are compared.</li>
+              <li>The cheaper option invests the difference weekly.</li>
+              <li>Depreciation, equity, resale value, and simplified business tax effects are included.</li>
+            </ul>
+          </div>
+
+          <div class="summary-card">
+            <h3>1 / 5 / 10 / 15 year snapshots</h3>
+            <div class="table-wrap">
+              <table id="snapTable">
+                <thead>
+                  <tr>
+                    <th>Horizon</th>
+                    <th>Keep current</th>
+                    <th>Buy EV</th>
+                    <th>EV - current</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel glass" id="charts">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Visuals</p>
+            <h2>Wealth, cost mix, and timeline</h2>
+          </div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-head">
+              <h3>Wealth over time</h3>
+              <p>Equity plus invested weekly savings</p>
+            </div>
+            <canvas id="wealthChart"></canvas>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-head">
+              <h3>Cost breakdown</h3>
+              <p>Loan payments, energy, RUC, depreciation</p>
+            </div>
+            <canvas id="costChart"></canvas>
+          </div>
+        </div>
+
+        <div class="timeline-card">
+          <div class="chart-head">
+            <h3>Cashflow timeline</h3>
+            <p>Quick visual summary of the scenario</p>
+          </div>
+          <div class="mermaid-frame">
+            <div class="mermaid" id="mermaidDiagram"></div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>
+          Built as a deployable static app with separate HTML, CSS, JS and SVG assets.
+          You can use it directly on Netlify.
+        </p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
