@@ -32,6 +32,7 @@ body {
   margin: 0;
   font-family: "Inter", system-ui, sans-serif;
   color: var(--text);
+  cursor: url("assets/cursor-electric.svg") 8 2, auto;
   background:
     radial-gradient(circle at 20% 0%, rgba(121, 215, 255, 0.18), transparent 28%),
     radial-gradient(circle at 100% 0%, rgba(111, 240, 196, 0.14), transparent 24%),
@@ -62,7 +63,7 @@ summary {
 }
 
 button {
-  cursor: pointer;
+  cursor: url("assets/cursor-electric.svg") 8 2, pointer;
 }
 
 code {
@@ -130,6 +131,7 @@ code {
   padding: 11px 14px;
   border-radius: 14px;
   border: 1px solid transparent;
+  cursor: url("assets/cursor-electric.svg") 8 2, pointer;
   transition: 160ms ease;
 }
 
@@ -394,7 +396,7 @@ h3 {
   background: rgba(255,255,255,0.04);
   display: grid;
   gap: 6px;
-  cursor: pointer;
+  cursor: url("assets/cursor-electric.svg") 8 2, pointer;
 }
 
 .switch-card input {
@@ -454,7 +456,7 @@ h3 {
 
 .details-block summary {
   color: var(--accent);
-  cursor: pointer;
+  cursor: url("assets/cursor-electric.svg") 8 2, pointer;
   margin-bottom: 12px;
 }
 

@@ -648,15 +648,32 @@ function compute() {
   const evVals = [totalEvLoanPay, totalEvElec, totalEvRUC, totalEvDep];
   makeOrUpdateCostChart(costLabels, curVals, evVals);
 
-  const mermaidText = `timeline
-    title VoltWise scenario (${analysisYears.toFixed(1)}y chart horizon)
-    Today : Weekly km = ${weeklyKm.toFixed(0)} : Petrol=${petrolPrice0.toFixed(2)} NZD/L : Elec=${elecPrice0.toFixed(3)} NZD/kWh : RUC=${rucPer1000.toFixed(0)}/1000km
-    Keep current : Pay EMI ${curEmiWeekly.toFixed(0)}/wk + petrol : Invest weekly savings if EV is pricier
-    Buy EV : Pay EMI ${evEmi.toFixed(0)}/wk + electricity + RUC : Invest weekly savings if EV is cheaper
-    Horizon end : Current wealth≈${Math.round(curWealthEnd)} : EV wealth≈${Math.round(evWealthEnd)}
+  const outcomeLabel = netDelta > threshold
+    ? "Recommendation: Buy EV"
+    : netDelta < -threshold
+      ? "Recommendation: Keep current car"
+      : "Recommendation: Financially close";
+
+  const mermaidText = `flowchart LR
+    A["Scenario Inputs<br/>${weeklyKm.toFixed(0)} km/week<br/>Horizon ${analysisYears.toFixed(1)} years"]
+    B["Keep Current Car<br/>EMI ${nzMoney2(curEmiWeekly)}/week<br/>Petrol ${nzMoney2(curPetrolNow)}/week"]
+    C["Buy EV<br/>EMI ${nzMoney2(evEmi)}/week<br/>Energy + RUC ${nzMoney2(evElecNow + evRUCNow)}/week"]
+    D["Weekly Cost Gap<br/>EV - Current = ${nzMoney2(weeklyDiffNow)}"]
+    E["Invest Weekly Difference<br/>Return ${pctStr(investReturnPct)}"]
+    F["Horizon End Wealth<br/>Current ${nzMoney(curWealthEnd)}<br/>EV ${nzMoney(evWealthEnd)}"]
+    G["${outcomeLabel}<br/>Net difference ${nzMoney(netDelta)}"]
+
+    A --> B
+    A --> C
+    B --> D
+    C --> D
+    D --> E
+    E --> F
+    F --> G
   `;
   $("mermaidDiagram").textContent = mermaidText;
   try {
+    $("mermaidDiagram").removeAttribute("data-processed");
     mermaid.init(undefined, $("mermaidDiagram"));
   } catch (e) {}
 
