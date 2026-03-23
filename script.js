@@ -1,4 +1,6 @@
 const $ = (id) => document.getElementById(id);
+const STORAGE_KEY = "voltwise_nz_ev_dashboard_v2";
+const THEME_KEY = "voltwise_theme";
 
 function clamp(x, lo, hi) { return Math.max(lo, Math.min(hi, x)); }
 function toNum(value, fallback = 0) {
@@ -19,6 +21,34 @@ function pctStr(x) {
   const v = Number(x);
   if (!Number.isFinite(v)) return "—";
   return `${v.toFixed(1)}%`;
+}
+
+function getTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  if (saved === "light" || saved === "dark") return saved;
+  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+}
+
+function applyTheme(theme) {
+  document.body.dataset.theme = theme;
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) metaTheme.setAttribute("content", theme === "light" ? "#edf4fb" : "#0b1020");
+
+  const btn = $("btnTheme");
+  if (btn) {
+    btn.setAttribute("aria-pressed", String(theme === "light"));
+    btn.querySelector(".theme-toggle-label").textContent = theme === "light" ? "Dark mode" : "Light mode";
+    btn.querySelector(".theme-toggle-icon").textContent = theme === "light" ? "☾" : "☀";
+  }
+}
+
+function getThemeColors() {
+  const styles = getComputedStyle(document.body);
+  return {
+    legend: styles.getPropertyValue("--legend-text").trim(),
+    tick: styles.getPropertyValue("--chart-tick").trim(),
+    grid: styles.getPropertyValue("--chart-grid").trim()
+  };
 }
 
 function parseCSV(text) {
@@ -184,8 +214,6 @@ async function fetchPetrolFromMBIE() {
   $("autofillStatus").textContent = `Petrol set from MBIE (${chosen.status}, ${chosen.date})`;
 }
 
-const STORAGE_KEY = "voltwise_nz_ev_dashboard_v2";
-
 function currentScenarioToJSON() {
   return {
     weeklyKm: toNum($("weeklyKm").value, 0),
@@ -272,6 +300,7 @@ let costChart = null;
 
 function makeOrUpdateWealthChart(labels, curWealth, evWealth) {
   const ctx = $("wealthChart").getContext("2d");
+  const theme = getThemeColors();
   if (!wealthChart) {
     wealthChart = new Chart(ctx, {
       type: "line",
@@ -301,7 +330,7 @@ function makeOrUpdateWealthChart(labels, curWealth, evWealth) {
         maintainAspectRatio: false,
         interaction: { mode: "index", intersect: false },
         plugins: {
-          legend: { labels: { color: "#d7e6fb" } },
+          legend: { labels: { color: theme.legend } },
           tooltip: {
             callbacks: {
               label: (ctx) => `${ctx.dataset.label}: ${nzMoney2(ctx.parsed.y)}`
@@ -310,12 +339,12 @@ function makeOrUpdateWealthChart(labels, curWealth, evWealth) {
         },
         scales: {
           x: {
-            ticks: { color: "rgba(232,238,248,0.65)" },
-            grid: { color: "rgba(255,255,255,0.06)" }
+            ticks: { color: theme.tick },
+            grid: { color: theme.grid }
           },
           y: {
-            ticks: { color: "rgba(232,238,248,0.65)" },
-            grid: { color: "rgba(255,255,255,0.06)" }
+            ticks: { color: theme.tick },
+            grid: { color: theme.grid }
           }
         }
       }
@@ -324,12 +353,18 @@ function makeOrUpdateWealthChart(labels, curWealth, evWealth) {
     wealthChart.data.labels = labels;
     wealthChart.data.datasets[0].data = curWealth;
     wealthChart.data.datasets[1].data = evWealth;
+    wealthChart.options.plugins.legend.labels.color = theme.legend;
+    wealthChart.options.scales.x.ticks.color = theme.tick;
+    wealthChart.options.scales.x.grid.color = theme.grid;
+    wealthChart.options.scales.y.ticks.color = theme.tick;
+    wealthChart.options.scales.y.grid.color = theme.grid;
     wealthChart.update();
   }
 }
 
 function makeOrUpdateCostChart(labels, curVals, evVals) {
   const ctx = $("costChart").getContext("2d");
+  const theme = getThemeColors();
   if (!costChart) {
     costChart = new Chart(ctx, {
       type: "doughnut",
@@ -354,7 +389,7 @@ function makeOrUpdateCostChart(labels, curVals, evVals) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { labels: { color: "#d7e6fb" } },
+          legend: { labels: { color: theme.legend } },
           tooltip: {
             callbacks: {
               label: (ctx) => `${ctx.dataset.label} — ${ctx.label}: ${nzMoney2(ctx.parsed)}`
@@ -367,6 +402,7 @@ function makeOrUpdateCostChart(labels, curVals, evVals) {
     costChart.data.labels = labels;
     costChart.data.datasets[0].data = curVals;
     costChart.data.datasets[1].data = evVals;
+    costChart.options.plugins.legend.labels.color = theme.legend;
     costChart.update();
   }
 }
@@ -722,7 +758,8 @@ function wireScrolling() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  mermaid.initialize({ startOnLoad: false, theme: "dark" });
+  applyTheme(getTheme());
+  mermaid.initialize({ startOnLoad: false, theme: getTheme() === "light" ? "default" : "dark" });
 
   if (!loadFromLocal()) resetDefaults();
   else compute();
@@ -756,5 +793,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   $("btnReset").addEventListener("click", resetDefaults);
+
+  $("btnTheme").addEventListener("click", () => {
+    const nextTheme = getTheme() === "light" ? "dark" : "light";
+    localStorage.setItem(THEME_KEY, nextTheme);
+    applyTheme(nextTheme);
+    mermaid.initialize({ startOnLoad: false, theme: nextTheme === "light" ? "default" : "dark" });
+    compute();
+  });
 
 });
