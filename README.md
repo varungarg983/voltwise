@@ -1,6 +1,6 @@
 # VoltWise
 
-Static Netlify-ready app.
+Static website app.
 
 ## Files
 - index.html
@@ -8,9 +8,9 @@ Static Netlify-ready app.
 - script.js
 - assets/
 
-## Deploy to Netlify
+## Deploy
 1. Keep the folder structure unchanged.
-2. Zip the folder or drag the whole folder into Netlify.
+2. Upload or host the folder contents on any static hosting platform.
 3. Since this is a static site, there is no build command.
 
 ## Notes
