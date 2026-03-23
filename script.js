@@ -267,18 +267,6 @@ function loadFromLocal() {
   }
 }
 
-function downloadJSON(obj, filename = "scenario.json") {
-  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
 let wealthChart = null;
 let costChart = null;
 
@@ -752,23 +740,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   $("btnReset").addEventListener("click", resetDefaults);
 
-  $("btnSave").addEventListener("click", () => {
-    const ts = new Date().toISOString().slice(0, 19).replaceAll(":", "-");
-    downloadJSON(currentScenarioToJSON(), `voltwise-scenario-${ts}.json`);
-  });
-
-  $("fileLoad").addEventListener("change", async (ev) => {
-    const f = ev.target.files && ev.target.files[0];
-    if (!f) return;
-    try {
-      const text = await f.text();
-      applyScenario(JSON.parse(text));
-      $("autofillStatus").textContent = "Scenario imported";
-      compute();
-    } catch (e) {
-      $("autofillStatus").textContent = "Import failed. Invalid JSON.";
-    } finally {
-      ev.target.value = "";
-    }
-  });
 });
